@@ -101,9 +101,9 @@ SEMS (Smart Environment Management System) is an ESP32-based IoT solution design
 SEMS/
 │
 ├── Arduino/
-│   └── SmartHall.ino
+│   └── Project-I0T-(SEMS).ino
 ├── Node-RED/
-│   └── flows.json
+│   └── Project-I0T-(SEMS)-Node-RED.json
 ├── Documentation/
 ├── README.md
 └── LICENSE
