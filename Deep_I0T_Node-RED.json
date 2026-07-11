@@ -1,0 +1,652 @@
+[
+    {
+        "id": "full_dashboard_flow",
+        "type": "tab",
+        "label": "IOT Dashboard",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "login_form",
+        "type": "ui_form",
+        "z": "full_dashboard_flow",
+        "name": "System Login",
+        "label": "Enter Credentials",
+        "group": "group_login",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "options": [
+            {
+                "label": "Username",
+                "value": "Username",
+                "type": "text",
+                "required": true,
+                "rows": null
+            },
+            {
+                "label": "Password",
+                "value": "Password",
+                "type": "password",
+                "required": true,
+                "rows": null
+            }
+        ],
+        "formValue": {
+            "Username": "",
+            "Password": ""
+        },
+        "payload": "",
+        "submit": "Login",
+        "cancel": "",
+        "topic": "topic",
+        "topicType": "msg",
+        "splitLayout": "",
+        "className": "",
+        "x": 250,
+        "y": 160,
+        "wires": [
+            [
+                "auth_function"
+            ]
+        ]
+    },
+    {
+        "id": "auth_function",
+        "type": "function",
+        "z": "full_dashboard_flow",
+        "name": "Check Project/IOT",
+        "func": "var user = msg.payload.Username;\nvar pass = msg.payload.Password;\n\nif (user === \"Project\" && pass === \"IOT\") {\n    var msg1 = { payload: { \"tabs\": { \"show\": [\"Control Tab\"], \"hide\": [\"Login Tab\"] } } };\n    var msg2 = { payload: { \"tab\": \"Control Tab\" } };\n    return [[msg1, msg2], null];\n} else {\n    var errMsg = { payload: \"Unauthorized Access!\" };\n    return [null, errMsg];\n}",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 450,
+        "y": 160,
+        "wires": [
+            [
+                "tab_controller"
+            ],
+            [
+                "error_notification"
+            ]
+        ]
+    },
+    {
+        "id": "tab_controller",
+        "type": "ui_ui_control",
+        "z": "full_dashboard_flow",
+        "name": "Switch Tabs",
+        "events": "all",
+        "x": 690,
+        "y": 140,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "error_notification",
+        "type": "ui_toast",
+        "z": "full_dashboard_flow",
+        "position": "top right",
+        "displayTime": "3",
+        "highlight": "red",
+        "sendall": true,
+        "outputs": 0,
+        "ok": "OK",
+        "cancel": "",
+        "raw": false,
+        "className": "",
+        "topic": "",
+        "name": "Error Msg",
+        "x": 690,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "mqtt_sensors_in",
+        "type": "mqtt in",
+        "z": "full_dashboard_flow",
+        "name": "Receive All Sensor Data",
+        "topic": "sensor/#",
+        "qos": "0",
+        "datatype": "auto-detect",
+        "broker": "499e7dcde6e39914",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 270,
+        "y": 320,
+        "wires": [
+            [
+                "sensor_filter_switch"
+            ]
+        ]
+    },
+    {
+        "id": "sensor_filter_switch",
+        "type": "switch",
+        "z": "full_dashboard_flow",
+        "name": "Route by Topic",
+        "property": "topic",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "sensor/temp",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "sensor/hum",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "sensor/gas",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "sensor/count",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "sensor/light1",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "sensor/light2",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "sensor/light3",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "sensor/fan",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "sensor/ac",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 9,
+        "x": 510,
+        "y": 320,
+        "wires": [
+            [
+                "gauge_temp"
+            ],
+            [
+                "gauge_hum"
+            ],
+            [
+                "chart_gas"
+            ],
+            [
+                "change_count_format"
+            ],
+            [
+                "ui_switch_light1"
+            ],
+            [
+                "ui_switch_light2"
+            ],
+            [
+                "ui_switch_light3"
+            ],
+            [
+                "ui_switch_fan"
+            ],
+            [
+                "ui_switch_ac"
+            ]
+        ]
+    },
+    {
+        "id": "gauge_temp",
+        "type": "ui_gauge",
+        "z": "full_dashboard_flow",
+        "name": "Temperature",
+        "group": "group_live_sensors",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "Temperature",
+        "label": "C",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "50",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 750,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "gauge_hum",
+        "type": "ui_gauge",
+        "z": "full_dashboard_flow",
+        "name": "Humidity",
+        "group": "group_live_sensors",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "gtype": "donut",
+        "title": "Humidity",
+        "label": "%",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "100",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 740,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "chart_gas",
+        "type": "ui_chart",
+        "z": "full_dashboard_flow",
+        "name": "Gas Trend",
+        "group": "group_live_sensors",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "label": "Gas Level",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "0",
+        "ymax": "4000",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "60",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 740,
+        "y": 320,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "change_count_format",
+        "type": "change",
+        "z": "full_dashboard_flow",
+        "name": "Format Student Count",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload & \" Student(s)\"",
+                "tot": "jsonata"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 760,
+        "y": 360,
+        "wires": [
+            [
+                "text_count"
+            ]
+        ]
+    },
+    {
+        "id": "text_count",
+        "type": "ui_text",
+        "z": "full_dashboard_flow",
+        "group": "group_live_sensors",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "name": "Student Count",
+        "label": "Inside Room:",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 940,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "ui_switch_light1",
+        "type": "ui_switch",
+        "z": "full_dashboard_flow",
+        "name": "Light Zone 1",
+        "label": "Light Zone 1",
+        "group": "group_lights",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "decouple": "true",
+        "topic": "room/light1",
+        "topicType": "str",
+        "onvalue": "ON",
+        "onvalueType": "str",
+        "offvalue": "OFF",
+        "offvalueType": "str",
+        "x": 900,
+        "y": 420,
+        "wires": [
+            [
+                "mqtt_controls_out"
+            ]
+        ]
+    },
+    {
+        "id": "ui_switch_light2",
+        "type": "ui_switch",
+        "z": "full_dashboard_flow",
+        "name": "Light Zone 2",
+        "label": "Light Zone 2",
+        "group": "group_lights",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "decouple": "true",
+        "topic": "room/light2",
+        "topicType": "str",
+        "onvalue": "ON",
+        "onvalueType": "str",
+        "offvalue": "OFF",
+        "offvalueType": "str",
+        "x": 900,
+        "y": 460,
+        "wires": [
+            [
+                "mqtt_controls_out"
+            ]
+        ]
+    },
+    {
+        "id": "ui_switch_light3",
+        "type": "ui_switch",
+        "z": "full_dashboard_flow",
+        "name": "Light Zone 3",
+        "label": "Light Zone 3",
+        "group": "group_lights",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "decouple": "true",
+        "topic": "room/light3",
+        "topicType": "str",
+        "onvalue": "ON",
+        "onvalueType": "str",
+        "offvalue": "OFF",
+        "offvalueType": "str",
+        "x": 900,
+        "y": 500,
+        "wires": [
+            [
+                "mqtt_controls_out"
+            ]
+        ]
+    },
+    {
+        "id": "ui_switch_fan",
+        "type": "ui_switch",
+        "z": "full_dashboard_flow",
+        "name": "Fan",
+        "label": "Ventilation Fan",
+        "group": "group_appliances",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "decouple": "true",
+        "topic": "room/fan",
+        "topicType": "str",
+        "onvalue": "ON",
+        "onvalueType": "str",
+        "offvalue": "OFF",
+        "offvalueType": "str",
+        "x": 900,
+        "y": 560,
+        "wires": [
+            [
+                "mqtt_controls_out"
+            ]
+        ]
+    },
+    {
+        "id": "ui_switch_ac",
+        "type": "ui_switch",
+        "z": "full_dashboard_flow",
+        "name": "AC",
+        "label": "Air Conditioner",
+        "group": "group_appliances",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "decouple": "true",
+        "topic": "room/ac",
+        "topicType": "str",
+        "onvalue": "ON",
+        "onvalueType": "str",
+        "offvalue": "OFF",
+        "offvalueType": "str",
+        "x": 900,
+        "y": 600,
+        "wires": [
+            [
+                "mqtt_controls_out"
+            ]
+        ]
+    },
+    {
+        "id": "btn_emergency_override",
+        "type": "ui_button",
+        "z": "full_dashboard_flow",
+        "name": "Emergency Override Button",
+        "group": "group_override",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "Force Normal Mode (Stop Emergency Alarms)",
+        "color": "white",
+        "bgcolor": "red",
+        "icon": "fa-stop",
+        "payload": "FORCE_OFF",
+        "payloadType": "str",
+        "topic": "room/override",
+        "topicType": "str",
+        "x": 350,
+        "y": 680,
+        "wires": [
+            [
+                "mqtt_controls_out"
+            ]
+        ]
+    },
+    {
+        "id": "mqtt_controls_out",
+        "type": "mqtt out",
+        "z": "full_dashboard_flow",
+        "name": "Send Commands to ESP32",
+        "topic": "",
+        "qos": "0",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "499e7dcde6e39914",
+        "x": 700,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "group_login",
+        "type": "ui_group",
+        "name": "Authentication",
+        "tab": "tab_login",
+        "order": 1,
+        "disp": true,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "group_live_sensors",
+        "type": "ui_group",
+        "name": "Live Sensors Monitoring",
+        "tab": "tab_control",
+        "order": 1,
+        "disp": true,
+        "width": "12",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "group_lights",
+        "type": "ui_group",
+        "name": "Lighting Zones",
+        "tab": "tab_control",
+        "order": 2,
+        "disp": true,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "group_appliances",
+        "type": "ui_group",
+        "name": "Climate Appliances",
+        "tab": "tab_control",
+        "order": 3,
+        "disp": true,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "group_override",
+        "type": "ui_group",
+        "name": "Emergency System Override",
+        "tab": "tab_control",
+        "order": 4,
+        "disp": true,
+        "width": "12",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "tab_login",
+        "type": "ui_tab",
+        "name": "Login Tab",
+        "icon": "dashboard",
+        "order": 1,
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "tab_control",
+        "type": "ui_tab",
+        "name": "Control Tab",
+        "icon": "dashboard",
+        "order": 2,
+        "disabled": false,
+        "hidden": true
+    },
+    {
+        "id": "499e7dcde6e39914",
+        "type": "mqtt-broker",
+        "name": "MyBroker",
+        "broker": "10.86.56.3",
+        "port": 1883,
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": 4,
+        "keepalive": 60,
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "d9715a9f9360db63",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "node-red-dashboard": "3.6.6"
+        }
+    }
+]
